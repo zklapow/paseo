@@ -1766,3 +1766,13 @@ Use `paseo plugin ls` to read the current status and error.
 | Edited code does not appear                                           | Run `npm run typecheck`, then `paseo plugin reload <id>`.                                                                               |
 | Reload fails                                                          | Read `paseo plugin ls` and `paseo plugin logs <id>`, fix the source error, then reload; Paseo does not restore the previous bundle.     |
 | Plugin exits unexpectedly                                             | Read `paseo plugin logs <id>` for retained initialization, cleanup, stderr, and final crash output.                                     |
+
+### Add a direct host from a surface
+
+This fork adds optional `PluginSurfaceProps.connections`. Feature-detect it for stock
+0.8 clients. After an explicit user action, call
+`await connections.addDirect({ endpoint: "sandbox.example:6767", password, useTls: false, label: "Sandbox" })`.
+The client authenticates the daemon before saving and matches existing hosts by daemon identity.
+The result contains only `serverId` and `label`; credentials are stored through the normal host registry.
+The method does not select a host or navigate away. On failure it rejects with a credential-safe error.
+No backend SDK connection lifecycle APIs are exposed, and the capability is unavailable to providers.
