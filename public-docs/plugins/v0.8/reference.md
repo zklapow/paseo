@@ -626,11 +626,14 @@ Paseo owns the route, header, close action, host picker, error boundary, and que
 
 ### Add a direct connection
 
-Registered surfaces receive optional `connections: PluginConnections`. Use it when your
-plugin discovers or provisions a daemon that the user wants to add to this Paseo client.
-Hide the action when `connections` is absent, including on older clients.
+Your plugin's page can add a server to Paseo's Hosts list. For example, a plugin
+that creates remote workspaces can let the user connect to one without copying
+its address and password into the Add host dialog.
 
-From a user-initiated action, call:
+Paseo passes `connections` to the page through `PluginSurfaceProps`. Older apps
+may not provide it, so only show an Add connection button when it is available.
+
+When the user chooses to connect, call:
 
 ```ts
 const host = await connections.addDirect({
@@ -641,19 +644,23 @@ const host = await connections.addDirect({
 });
 ```
 
-`endpoint` is a host and port, not a URI. Bracket IPv6 addresses, for example
-`[::1]:6767`. `useTls` defaults to `false`; `password` and `label` are optional.
-Handle the returned promise to show a pending state and report failures.
+Use `hostname:port` for `endpoint`, without a prefix such as `tcp://`.
+For IPv6, put brackets around the address: `[::1]:6767`.
+Set `useTls: true` to use TLS (the app's **Use SSL** option); it defaults to
+`false`. You can leave out `password` and `label` if they aren't needed.
 
-Paseo authenticates before saving, then returns `{ serverId, label }`. Existing
-hosts are matched by daemon identity. Credentials are saved through the client's
-normal host registry and are not returned in the result. A failed connection
-rejects with a credential-safe error. The method does not select the new host or
-navigate away; the user can select it from Hosts.
+Show a loading state while the call runs and an error if it fails. Paseo checks
+that it can connect and authenticate before saving the host. On success, the
+call returns the host's ID and display name as `{ serverId, label }`. Adding the
+same server again updates its saved connection instead of creating another host.
+Errors do not include the password.
 
-This capability belongs to the client displaying the surface, not the daemon
-running the plugin backend. The backend SDK and provider API do not gain host
-registration or connection lifecycle methods.
+The host and its password are saved in the Paseo app where the user clicked the
+button. For example, adding a host on a phone doesn't also add it on a laptop.
+The user stays on the plugin's page and can select the new host from **Hosts**.
+
+Call this from your plugin's UI code. Code running on the server, including
+provider plugins, cannot use this method.
 
 ## Host UI
 
