@@ -167,6 +167,10 @@ Plugin UI runs on desktop and mobile across multiple themes: color every `Text` 
 `theme.colors.foreground` or `theme.colors.foregroundMuted`, and size layout from `layout.compact`.
 See `public-docs/plugins/v0.8/reference.md`.
 
+Surfaces can use the optional client-owned `connections` capability to register a
+user-selected remote daemon. See [direct connections](../public-docs/plugins/v0.8/reference.md#add-a-direct-connection)
+for the API and credential-storage contract.
+
 ### SDK import boundaries
 
 Classify every SDK export before adding it. All client entry points and implementations live under

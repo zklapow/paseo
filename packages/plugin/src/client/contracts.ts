@@ -38,7 +38,32 @@ interface PluginNavigableHostProps extends PluginHostProps {
   };
 }
 
-export interface PluginSurfaceProps extends PluginNavigableHostProps {}
+export interface PluginDirectConnectionInput {
+  /** Host and port, for example "server.example:6767" or "[::1]:6767". */
+  readonly endpoint: string;
+  readonly useTls?: boolean;
+  readonly password?: string;
+  readonly label?: string;
+}
+
+export interface PluginConnectedHost {
+  readonly serverId: string;
+  readonly label: string;
+}
+
+export interface PluginConnections {
+  /**
+   * Authenticate and save a direct TCP host in this client. Invoke from a user action.
+   * Existing hosts are matched by daemon identity. Credentials use normal host storage.
+   * Does not change the selected host or navigate away from the surface.
+   */
+  readonly addDirect: (input: PluginDirectConnectionInput) => Promise<PluginConnectedHost>;
+}
+
+export interface PluginSurfaceProps extends PluginNavigableHostProps {
+  /** Client-owned host registration. Feature-detect on older clients. */
+  readonly connections?: PluginConnections;
+}
 
 export interface PluginIconProps {
   name: string;

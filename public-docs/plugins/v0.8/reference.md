@@ -620,8 +620,40 @@ export default function contribute(client: PluginClientContext) {
 | `host`       | Selected host `id` and display `label`.                                                                                      |
 | `layout`     | `compact` and the `ios`, `android`, or `web` platform.                                                                       |
 | `navigation` | Optional client navigation. `openAgent({ agentId })` and `openWorkspace({ workspaceId })` open targets on the selected host. |
+| `connections` | Optional client-owned direct host registration on registered surfaces. See [Add a direct connection](#add-a-direct-connection). |
 
 Paseo owns the route, header, close action, host picker, error boundary, and query client. The plugin owns the surface body.
+
+### Add a direct connection
+
+Registered surfaces receive optional `connections: PluginConnections`. Use it when your
+plugin discovers or provisions a daemon that the user wants to add to this Paseo client.
+Hide the action when `connections` is absent, including on older clients.
+
+From a user-initiated action, call:
+
+```ts
+const host = await connections.addDirect({
+  endpoint: "server.example:6767",
+  useTls: true,
+  password,
+  label: "Remote workspace",
+});
+```
+
+`endpoint` is a host and port, not a URI. Bracket IPv6 addresses, for example
+`[::1]:6767`. `useTls` defaults to `false`; `password` and `label` are optional.
+Handle the returned promise to show a pending state and report failures.
+
+Paseo authenticates before saving, then returns `{ serverId, label }`. Existing
+hosts are matched by daemon identity. Credentials are saved through the client's
+normal host registry and are not returned in the result. A failed connection
+rejects with a credential-safe error. The method does not select the new host or
+navigate away; the user can select it from Hosts.
+
+This capability belongs to the client displaying the surface, not the daemon
+running the plugin backend. The backend SDK and provider API do not gain host
+registration or connection lifecycle methods.
 
 ## Host UI
 
